@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>py_binding_tools</name>
-  <version>0.0.0</version>
+  <version>1.0.0</version>
   <description>Python binding tools for C++</description>
 
   <author email="rhaschke@techfak.uni-bielefeld.de">Robert Haschke</author>
