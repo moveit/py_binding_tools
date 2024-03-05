@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>py_binding_tools</name>
+  <version>0.0.0</version>
+  <description>Python binding tools for C++</description>
+
+  <author email="rhaschke@techfak.uni-bielefeld.de">Robert Haschke</author>
+  <maintainer email="rhaschke@techfak.uni-bielefeld.de">Robert Haschke</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://wiki.ros.org/py_binding_tools</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>pybind11_catkin</build_depend>
+  <depend>geometry_msgs</depend>
+  <depend>roscpp</depend>
+
+  <export>
+  </export>
+</package>
