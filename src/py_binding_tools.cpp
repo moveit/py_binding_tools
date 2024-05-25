@@ -48,9 +48,7 @@ PYBIND11_MODULE(py_binding_tools, m)
       .value("AnonymousName", ros::init_options::AnonymousName)
       .value("NoRosout", ros::init_options::NoRosout);
 
-  m.def("roscpp_init", &roscpp_init, "Initialize C++ ROS",
-        py::arg("node_name") = "",
-        py::arg("remappings") = std::map<std::string, std::string>(),
-        py::arg("options") = 0);
+  m.def("roscpp_init", &roscpp_init, "Initialize C++ ROS", py::arg("node_name") = "",
+        py::arg("remappings") = std::map<std::string, std::string>(), py::arg("options") = 0);
   m.def("roscpp_shutdown", &roscpp_shutdown, "Shutdown C++ ROS");
 }

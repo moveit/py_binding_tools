@@ -5,7 +5,6 @@
 namespace py = pybind11;
 namespace
 {
-
 struct PubAndSub
 {
 public:
@@ -20,7 +19,7 @@ public:
   {
     std_msgs::Int32 message{};
     message.data = value;
-    pub.publish(std::move(message));
+    pub.publish(message);
   }
 
   void callback(const std_msgs::Int32& message)

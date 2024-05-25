@@ -49,9 +49,7 @@ public:
   ~ROScppInitializer();
 };
 
-void roscpp_init(const std::string& node_name,
-                 const std::map<std::string, std::string>& remappings,
-                 uint32_t options);
+void roscpp_init(const std::string& node_name, const std::map<std::string, std::string>& remappings, uint32_t options);
 
 void roscpp_shutdown();
 

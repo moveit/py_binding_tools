@@ -16,14 +16,16 @@ catkin_package(
   CATKIN_DEPENDS geometry_msgs roscpp
 )
 
-include_directories(include ${catkin_INCLUDE_DIRS})
-
 add_library(${PROJECT_NAME}
   src/ros_msg_typecasters.cpp
   src/initializer.cpp
 )
-add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${PYTHON_LIBRARIES})
+target_include_directories(${PROJECT_NAME}
+	PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+  SYSTEM PUBLIC ${catkin_INCLUDE_DIRS}
+)
+add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 
 install(
   TARGETS ${PROJECT_NAME}

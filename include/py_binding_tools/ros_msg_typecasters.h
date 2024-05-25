@@ -54,7 +54,7 @@ PYBIND11_EXPORT bool convertible(const pybind11::handle& h, const char* ros_msg_
  */
 PYBIND11_EXPORT void throwDeserializationError [[noreturn]] ();
 
-} // namespace py_binding_tools
+}  // namespace py_binding_tools
 
 namespace pybind11
 {
