@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package format="2">
+<package format="3">
   <name>py_binding_tools</name>
   <version>1.0.0</version>
   <description>Python binding tools for C++</description>
@@ -11,15 +11,20 @@
 
   <url type="website">http://wiki.ros.org/py_binding_tools</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>pybind11_catkin</build_depend>
-  <depend>geometry_msgs</depend>
-  <depend>roscpp</depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
 
-  <test_depend>rostest</test_depend>
-  <test_depend>ros_pytest</test_depend>
+  <depend>pybind11_vendor</depend>
+  <depend>geometry_msgs</depend>
+  <depend>rclcpp</depend>
+
   <test_depend>std_msgs</test_depend>
+  <test_depend>rclpy</test_depend>
+  <test_depend>ament_cmake_pytest</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
 
   <export>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

@@ -33,24 +33,22 @@
  *********************************************************************/
 #pragma once
 
-#include <ros/init.h>
+#include <string>
+#include <vector>
 
 namespace py_binding_tools
 {
-/** The constructor of this class ensures that ros::init() has been called.
+/** The constructor of this class ensures that rclcpp::init() has been called.
  *
- *  Thread safety and multiple initialization is properly handled.
- *  The default node name is "python_wrapper".
- *  If you like to have a custom name, use the roscpp_init() function before. */
-class ROScppInitializer
+ *  Thread safety and multiple initialization is properly handled. */
+class RCLInitializer
 {
 public:
-  ROScppInitializer();
-  ~ROScppInitializer();
+  RCLInitializer();
+  ~RCLInitializer();
 };
 
-void roscpp_init(const std::string& node_name, const std::map<std::string, std::string>& remappings, uint32_t options);
-
-void roscpp_shutdown();
+void init(const std::vector<std::string>& args);
+void shutdown();
 
 }  // namespace py_binding_tools

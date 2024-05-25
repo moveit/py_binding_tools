@@ -33,69 +33,81 @@
  *********************************************************************/
 
 #include <memory>
+#include <thread>
 #include <mutex>
 
 #include <py_binding_tools/initializer.h>
-#include <ros/init.h>
-#include <ros/spinner.h>
-#include <ros/this_node.h>
+#include <rclcpp/node.hpp>
+#include <rclcpp/executors.hpp>
 
 namespace py_binding_tools
 {
 namespace
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("InitProxy");
+
 /// singleton class to initialize ROS C++ (once) from Python
 class InitProxy
 {
 public:
-  static void init(const std::string& node_name = "",
-                   const std::map<std::string, std::string>& remappings = std::map<std::string, std::string>(),
-                   uint32_t options = 0);
+  static void init(const std::vector<std::string>& args = {});
   static void reset(bool shutdown);
+  static void add_node(const rclcpp::Node::SharedPtr& node)
+  {
+    if (singleton_instance_)
+      singleton_instance_->executor_->add_node(node);
+  }
 
   ~InitProxy()
   {
-    spinner_->stop();
-    spinner_.reset();
-    if (ros::isInitialized() && !ros::isShuttingDown())
-      ros::shutdown();
+    stop_ = true;
+    spinner_.join();
+    rclcpp::shutdown();
   }
 
 private:
-  InitProxy(std::string node_name, const std::map<std::string, std::string>& remappings, uint32_t options)
+  InitProxy(const std::vector<std::string>& args)
   {
-    if (node_name.empty())
-    {
-      node_name = "python_wrapper";
-      options |= ros::init_options::AnonymousName;
-    }
     usage_ = 0;
-    if (!ros::isInitialized())
-      ros::init(remappings, node_name, options | ros::init_options::NoSigintHandler);
+    stop_ = false;
+    if (!rclcpp::ok())
+    {
+      std::vector<const char*> raw_args;
+      raw_args.reserve(args.size());
+      for (auto& arg : args)
+        raw_args.push_back(arg.c_str());
+      rclcpp::init(raw_args.size(), raw_args.data());
+    }
     else
-      ROS_WARN_STREAM("ros::init was already called by other means. node name: " << ros::this_node::getName());
-    spinner_ = std::make_unique<ros::AsyncSpinner>(1);
-    spinner_->start();
+      RCLCPP_WARN_STREAM(LOGGER, "rclcpp::init was already called by other means.");
+
+    // create an executor to spin nodes
+    rclcpp::ExecutorOptions eo;
+    eo.context = rclcpp::contexts::get_global_default_context();
+    executor_ = std::make_unique<rclcpp::executors::SingleThreadedExecutor>(eo);
+
+    spinner_ = std::thread([this]() {
+      while (!stop_ && rclcpp::ok())
+        executor_->spin_all(std::chrono::milliseconds(100));
+    });
   }
 
   static std::mutex mutex_;
   static std::unique_ptr<InitProxy> singleton_instance_;
   unsigned int usage_;
-  std::unique_ptr<ros::AsyncSpinner> spinner_;
+  bool stop_;
+  rclcpp::executors::SingleThreadedExecutor::UniquePtr executor_;
+  std::thread spinner_;
 };
 std::mutex InitProxy::mutex_;
 std::unique_ptr<InitProxy> InitProxy::singleton_instance_;
 }  // namespace
 
-void InitProxy::init(const std::string& node_name, const std::map<std::string, std::string>& remappings,
-                     uint32_t options)
+void InitProxy::init(const std::vector<std::string>& args)
 {
   std::unique_lock<std::mutex> lock(mutex_);
   if (!singleton_instance_)
-    singleton_instance_.reset(new InitProxy(node_name, remappings, options));
-  else if (!node_name.empty())
-    ROS_WARN("ROS C++ was initialized before with name '%s'.%s", ros::this_node::getName().c_str(),
-             remappings.empty() ? "" : " Ignoring additional remappings.");
+    singleton_instance_.reset(new InitProxy(args));
   ++singleton_instance_->usage_;
 }
 
@@ -103,33 +115,33 @@ void InitProxy::reset(bool shutdown)
 {
   std::unique_lock<std::mutex> lock(mutex_);
   if (!singleton_instance_ || singleton_instance_->usage_ == 0)
-    ROS_ERROR("Called roscpp_shutdown() without a matching call to roscpp.init()!");
+    RCLCPP_ERROR(LOGGER, "Called rclcpp.shutdown() without a matching call to rclcpp.init()!");
   else if (--singleton_instance_->usage_ == 0 && shutdown)
-  {
-    // shutdown silences any ROS logging
-    ROS_WARN("It's not recommended to call roscpp_shutdown().");
     singleton_instance_.reset();
-  }
 }
 
-ROScppInitializer::ROScppInitializer()
+RCLInitializer::RCLInitializer()
 {
   InitProxy::init();
 }
-ROScppInitializer::~ROScppInitializer()
+RCLInitializer::~RCLInitializer()
 {
   InitProxy::reset(false);
 }
 
-void roscpp_init(const std::string& node_name, const std::map<std::string, std::string>& remappings, uint32_t options)
+void init(const std::vector<std::string>& args)
 {
-  InitProxy::init(node_name, remappings, options);
+  InitProxy::init(args);
 }
 
-void roscpp_shutdown()
+void shutdown()
 {
-  // This might shutdown ROS C++, which will stop ROS logging!
   InitProxy::reset(true);
+}
+
+void add_node(const rclcpp::Node::SharedPtr& node)
+{
+  InitProxy::add_node(node);
 }
 
 }  // namespace py_binding_tools

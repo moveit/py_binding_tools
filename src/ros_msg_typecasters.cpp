@@ -39,34 +39,22 @@
 namespace py = pybind11;
 namespace py_binding_tools
 {
-py::object createMessage(const std::string& ros_msg_name)
+py::object createMessageClass(const std::string& ros_msg_name)
 {
-  // find delimiting '/' in ros msg name
-  std::size_t pos = ros_msg_name.find('/');
   // import module
+  std::size_t pos = ros_msg_name.find('/');  // find "/msg/"
   py::module m = py::module::import((ros_msg_name.substr(0, pos) + ".msg").c_str());
   // retrieve type instance
-  py::object cls = m.attr(ros_msg_name.substr(pos + 1).c_str());
-  // create message instance
-  return cls();
+  return m.attr(ros_msg_name.substr(pos + 5).c_str());
 }
 
-bool convertible(const pybind11::handle& h, const char* ros_msg_name)
+bool convertible(const py::handle& h, const std::string& ros_msg_name)
 {
-  try
-  {
-    return py::cast<std::string>(h.attr("_type")) == ros_msg_name;
-  }
-  catch (const std::exception& e)
-  {
-    return false;
-  }
-}
-
-void throwDeserializationError()
-{
-  py::object e = py::module::import("genpy").attr("DeserializationError")();
-  PyErr_SetObject(e.get_type().ptr(), e.ptr());
-  throw py::error_already_set();
+  auto cls = h.attr("__class__");
+  auto name = cls.attr("__name__").cast<std::string>();
+  auto module = cls.attr("__module__").cast<std::string>();
+  auto pos = module.find(".msg");
+  auto class_name = module.substr(0, pos) + "/msg/" + name;
+  return ros_msg_name == class_name;
 }
 }  // namespace py_binding_tools

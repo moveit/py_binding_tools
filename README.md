@@ -19,16 +19,14 @@ In this case, the string is interpreted as the `header.frame_id` field of the me
 
 ### C++ ROS initialization
 
-C++ and Python use their own ROS implementations (`rospy` and `roscpp`).
+C++ and Python use their own RCL implementations (`rclpy` and `rclcpp`).
 Thus, it is necessary to initialize ROS in the C++ domain additionally to the Python domain before calling any ROS-related functions from wrapped C++ functions or classes.
-To this end, the package provides the python function `roscpp_init()` and the C++ class `ROScppInitializer`. The latter is intended to be used as a base class for your python wrapper classes:
+To this end, the package provides the python function `rclcpp.init()` and the C++ class `RCLInitializer`. The latter is intended to be used as a base class for your python wrapper classes:
 
 ```cpp
-class FooWrapper : protected ROScppInitializer, public Foo {
+class FooWrapper : protected RCLInitializer, public Foo {
 	// ...
 };
 ```
 
-to ensure that the ROS infrastructure is initialized before usage in the wrapped C++ class. Ensure to list `ROScppInitializer` as the _first_ base class, if ROS functionality is required in the constructor already!
-
-`ROScppInitializer` registers an anonymous C++ ROS node named `python_wrapper_xxx`. If you need a specific node name or if you want to pass remappings, use the manual initialization function `roscpp_init(name="", remappings={}, options=0)` instead, which effectively calls `ros::init` with the given arguments. Note, that an empty name will map to the above-mentioned node name `python_wrapper_xxx`.
+to ensure that the ROS infrastructure is initialized before usage in the wrapped C++ class. Ensure to list `RCLInitializer` as the _first_ base class, if ROS functionality is required in the constructor already!

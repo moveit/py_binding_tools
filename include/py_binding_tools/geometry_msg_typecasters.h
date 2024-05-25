@@ -45,7 +45,7 @@ namespace detail
 {
 /** Convienency type caster, also allowing to initialize PoseStamped from a string */
 template <>
-struct type_caster<geometry_msgs::PoseStamped> : RosMsgTypeCaster<geometry_msgs::PoseStamped>
+struct type_caster<geometry_msgs::msg::PoseStamped> : RosMsgTypeCaster<geometry_msgs::msg::PoseStamped>
 {
   // Python -> C++
   bool load(handle src, bool convert)
@@ -57,7 +57,7 @@ struct type_caster<geometry_msgs::PoseStamped> : RosMsgTypeCaster<geometry_msgs:
       value.pose.orientation.w = 1.0;
       return true;
     }
-    return RosMsgTypeCaster<geometry_msgs::PoseStamped>::load(src, convert);
+    return RosMsgTypeCaster<geometry_msgs::msg::PoseStamped>::load(src, convert);
   }
 };
 

@@ -1,4 +1,0 @@
-<launch>
-  <param name="test_module" value="$(find py_binding_tools)/test"/>
-  <test test-name="basic" pkg="ros_pytest" type="ros_pytest_runner"/>
-</launch>

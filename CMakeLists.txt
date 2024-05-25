@@ -1,59 +1,56 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.5)
 project(py_binding_tools)
 
-find_package(catkin REQUIRED
-COMPONENTS
-	geometry_msgs
-	pybind11_catkin
-	roscpp
-)
+find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+find_package(pybind11_vendor REQUIRED)
+find_package(pybind11 REQUIRED)
 
-# catkin_python_setup()
-
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS geometry_msgs roscpp
-)
-
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} SHARED
   src/ros_msg_typecasters.cpp
   src/initializer.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${PYTHON_LIBRARIES})
 target_include_directories(${PROJECT_NAME}
-	PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-  SYSTEM PUBLIC ${catkin_INCLUDE_DIRS}
-)
-add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include/${PROJECT_NAME}>)
+ament_target_dependencies(${PROJECT_NAME} rclcpp geometry_msgs pybind11)
+
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 
 install(
   TARGETS ${PROJECT_NAME}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+  EXPORT ${PROJECT_NAME}Targets
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 
-install(DIRECTORY include/${PROJECT_NAME}/
-   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+install(
+  DIRECTORY include/
+  DESTINATION include/${PROJECT_NAME}
 )
 
-#catkin_lint cannot detect target declarations in functions, here in pybind11_add_module
-#catkin_lint: ignore undefined_target
+_ament_cmake_python_register_environment_hook()
 
-pybind_add_module(${PROJECT_NAME}_module src/${PROJECT_NAME}.cpp)
-set_target_properties(${PROJECT_NAME}_module PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
-target_link_libraries(${PROJECT_NAME}_module PRIVATE ${PROJECT_NAME})
+pybind11_add_module(rclcpp src/rclcpp.cpp)
+target_link_libraries(rclcpp PRIVATE ${PROJECT_NAME})
+install(TARGETS rclcpp LIBRARY DESTINATION "${PYTHON_INSTALL_DIR}")
 
-install(TARGETS ${PROJECT_NAME}_module
-  LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})
-
-if(CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
+if(BUILD_TESTING)
+  find_package(ament_cmake_pytest REQUIRED)
   find_package(std_msgs REQUIRED)
-  pybind_add_module(${PROJECT_NAME}_test test/test.cpp)
-  target_link_libraries(${PROJECT_NAME}_test PRIVATE ${PROJECT_NAME} ${std_msgs_TARGETS})
-  install(TARGETS ${PROJECT_NAME}_test LIBRARY DESTINATION "${CATKIN_GLOBAL_PYTHON_DESTINATION}")
 
-  add_rostest(test/basic.test)
+  pybind11_add_module(${PROJECT_NAME}_test test/test.cpp)
+  target_link_libraries(${PROJECT_NAME}_test PRIVATE ${PROJECT_NAME} ${std_msgs_TARGETS})
+  install(TARGETS ${PROJECT_NAME}_test LIBRARY DESTINATION "${PYTHON_INSTALL_DIR}")
+
+  ament_add_pytest_test(basic test/test_basic.py)
 endif()
+
+ament_export_dependencies(rclcpp)
+ament_export_dependencies(geometry_msgs)
+ament_package()

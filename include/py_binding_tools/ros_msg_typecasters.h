@@ -37,66 +37,49 @@
 #pragma once
 
 #include <pybind11/pybind11.h>
-#include <ros/duration.h>
-#include <ros/serialization.h>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/serialization.hpp>
+#include <rclcpp/duration.hpp>
 
 /** Provide pybind11 type converters for ROS types */
 
 namespace py_binding_tools
 {
-PYBIND11_EXPORT pybind11::object createMessage(const std::string& ros_msg_name);
-PYBIND11_EXPORT bool convertible(const pybind11::handle& h, const char* ros_msg_name);
-
-/** Throws genpy.DeserializationError exception.
- *
- * This is a convenience method to support the old behaviour of returning
- * an empty ByteString.
- */
-PYBIND11_EXPORT void throwDeserializationError [[noreturn]] ();
-
+PYBIND11_EXPORT pybind11::object createMessageClass(const std::string& ros_msg_name);
+PYBIND11_EXPORT bool convertible(const pybind11::handle& h, const std::string& ros_msg_name);
 }  // namespace py_binding_tools
 
 namespace pybind11
 {
 namespace detail
 {
-/// Convert ros::Duration/ros::WallDuration to/from float
-template <typename T>
-struct DurationCaster
+/// Convert rclcpp::Duration to/from float
+template <>
+struct type_caster<rclcpp::Duration>
 {
   // C++ -> Python
-  static handle cast(T&& src, return_value_policy /* policy */, handle /* parent */)
+  static handle cast(rclcpp::Duration&& src, return_value_policy /* policy */, handle /* parent */)
   {
-    return PyFloat_FromDouble(src.toSec());
+    return PyFloat_FromDouble(src.seconds());
   }
 
   // Python -> C++
   bool load(handle src, bool convert)
   {
-    if (hasattr(src, "to_sec"))
+    if (hasattr(src, "nanoseconds"))
     {
-      value = T(src.attr("to_sec")().cast<double>());
+      value = rclcpp::Duration(std::chrono::nanoseconds(src.attr("nanoseconds")().cast<int64_t>()));
     }
     else if (convert)
     {
-      value = T(src.cast<double>());
+      value = rclcpp::Duration(std::chrono::duration<double>(src.cast<double>()));
     }
     else
       return false;
     return true;
   }
 
-  PYBIND11_TYPE_CASTER(T, _("Duration"));
-};
-
-template <>
-struct type_caster<ros::Duration> : DurationCaster<ros::Duration>
-{
-};
-
-template <>
-struct type_caster<ros::WallDuration> : DurationCaster<ros::WallDuration>
-{
+  PYBIND11_TYPE_CASTER(rclcpp::Duration, _("Duration"));
 };
 
 /// Base class for type conversion (C++ <-> python) of ROS message types
@@ -106,14 +89,20 @@ struct RosMsgTypeCaster
   // C++ -> Python
   static handle cast(const T& src, return_value_policy /* policy */, handle /* parent */)
   {
-    // serialize src into (python) buffer
-    std::size_t size = ros::serialization::serializationLength(src);
-    object pbuffer = reinterpret_steal<object>(PyBytes_FromStringAndSize(nullptr, size));
-    ros::serialization::OStream stream(reinterpret_cast<uint8_t*>(PyBytes_AsString(pbuffer.ptr())), size);
-    ros::serialization::serialize(stream, src);
-    // deserialize python type from buffer
-    object msg = py_binding_tools::createMessage(ros::message_traits::DataType<T>::value());
-    msg.attr("deserialize")(pbuffer);
+    // serialize src
+    rclcpp::Serialization<T> serializer;
+    rclcpp::SerializedMessage serialized_msg;
+    serializer.serialize_message(&src, &serialized_msg);
+    bytes buf = bytes(reinterpret_cast<const char*>(serialized_msg.get_rcl_serialized_message().buffer),
+                      serialized_msg.get_rcl_serialized_message().buffer_length);
+
+    // retrieve message type instance
+    object cls = py_binding_tools::createMessageClass(rosidl_generator_traits::name<T>());
+
+    // deserialize into python object
+    module rclpy = module::import("rclpy.serialization");
+    object msg = rclpy.attr("deserialize_message")(buf, cls);
+
     return msg.release();
   }
 
@@ -121,27 +110,33 @@ struct RosMsgTypeCaster
   bool load(handle src, bool /*convert*/)
   {
     // check datatype of src
-    if (!py_binding_tools::convertible(src, ros::message_traits::DataType<T>::value()))
+    if (!py_binding_tools::convertible(src, rosidl_generator_traits::name<T>()))
       return false;
+
     // serialize src into python buffer
-    object pstream = module::import("io").attr("BytesIO")();
-    src.attr("serialize")(pstream);
-    object pbuffer = pstream.attr("getvalue")();
-    // deserialize C++ type from buffer
-    char* cbuffer = nullptr;
+    module rclpy = module::import("rclpy.serialization");
+    bytes buf = rclpy.attr("serialize_message")(src);
+
+    // deserialize into C++ object
+    rcl_serialized_message_t rcl_serialized_msg = rmw_get_zero_initialized_serialized_message();
+    char* serialized_buffer;
     Py_ssize_t length;
-    if (PYBIND11_BYTES_AS_STRING_AND_SIZE(pbuffer.ptr(), &cbuffer, &length))
+    if (PYBIND11_BYTES_AS_STRING_AND_SIZE(buf.ptr(), &serialized_buffer, &length))
       return false;
-    ros::serialization::IStream cstream(reinterpret_cast<uint8_t*>(cbuffer), length);
-    ros::serialization::deserialize(cstream, value);
-    return true;
+
+    rcl_serialized_msg.buffer_capacity = length;
+    rcl_serialized_msg.buffer_length = length;
+    rcl_serialized_msg.buffer = reinterpret_cast<uint8_t*>(serialized_buffer);
+    rmw_ret_t rmw_ret =
+        rmw_deserialize(&rcl_serialized_msg, rosidl_typesupport_cpp::get_message_type_support_handle<T>(), &value);
+    return (rmw_ret == RMW_RET_OK);
   }
 
   PYBIND11_TYPE_CASTER(T, _<T>());
 };
 
 template <typename T>
-struct type_caster<T, enable_if_t<ros::message_traits::IsMessage<T>::value>> : RosMsgTypeCaster<T>
+struct type_caster<T, enable_if_t<rosidl_generator_traits::is_message<T>::value>> : RosMsgTypeCaster<T>
 {
 };
 
