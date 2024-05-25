@@ -55,8 +55,7 @@ bool convertible(const pybind11::handle& h, const char* ros_msg_name)
 {
   try
   {
-    PyObject* o = h.attr("_type").ptr();
-    return py::cast<std::string>(o) == ros_msg_name;
+    return py::cast<std::string>(h.attr("_type")) == ros_msg_name;
   }
   catch (const std::exception& e)
   {

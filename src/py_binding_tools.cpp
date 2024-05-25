@@ -35,7 +35,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <ros/init.h>
-#include <py_binding_tools/roscpp_initializer.h>
+#include <py_binding_tools/initializer.h>
 
 namespace py = pybind11;
 using namespace py_binding_tools;

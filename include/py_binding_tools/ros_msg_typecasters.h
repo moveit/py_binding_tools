@@ -60,7 +60,7 @@ namespace pybind11
 {
 namespace detail
 {
-/// Convert ros::Duration / ros::WallDuration into a float
+/// Convert ros::Duration/ros::WallDuration to/from float
 template <typename T>
 struct DurationCaster
 {
@@ -120,17 +120,19 @@ struct RosMsgTypeCaster
   // Python -> C++
   bool load(handle src, bool /*convert*/)
   {
+    // check datatype of src
     if (!py_binding_tools::convertible(src, ros::message_traits::DataType<T>::value()))
       return false;
-    // serialize src into (python) buffer
+    // serialize src into python buffer
     object pstream = module::import("io").attr("BytesIO")();
     src.attr("serialize")(pstream);
     object pbuffer = pstream.attr("getvalue")();
     // deserialize C++ type from buffer
     char* cbuffer = nullptr;
-    Py_ssize_t size;
-    PyBytes_AsStringAndSize(pbuffer.ptr(), &cbuffer, &size);
-    ros::serialization::IStream cstream(const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(cbuffer)), size);
+    Py_ssize_t length;
+    if (PYBIND11_BYTES_AS_STRING_AND_SIZE(pbuffer.ptr(), &cbuffer, &length))
+      return false;
+    ros::serialization::IStream cstream(reinterpret_cast<uint8_t*>(cbuffer), length);
     ros::serialization::deserialize(cstream, value);
     return true;
   }

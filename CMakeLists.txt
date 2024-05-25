@@ -20,7 +20,7 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_library(${PROJECT_NAME}
   src/ros_msg_typecasters.cpp
-  src/roscpp_initializer.cpp
+  src/initializer.cpp
 )
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${PYTHON_LIBRARIES})
