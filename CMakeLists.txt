@@ -45,3 +45,13 @@ target_link_libraries(${PROJECT_NAME}_module PRIVATE ${PROJECT_NAME})
 
 install(TARGETS ${PROJECT_NAME}_module
   LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})
+
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  find_package(std_msgs REQUIRED)
+  pybind_add_module(${PROJECT_NAME}_test test/test.cpp)
+  target_link_libraries(${PROJECT_NAME}_test PRIVATE ${PROJECT_NAME} ${std_msgs_TARGETS})
+  install(TARGETS ${PROJECT_NAME}_test LIBRARY DESTINATION "${CATKIN_GLOBAL_PYTHON_DESTINATION}")
+
+  add_rostest(test/basic.test)
+endif()
