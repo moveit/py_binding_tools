@@ -68,7 +68,17 @@ PYBIND11_MODULE(rclcpp, m)
 {
   m.doc() = "C++ Python binding tools";
 
-  m.def("init", &init, "Initialize rclcpp", py::arg("args") = std::vector<std::string>{});
+  m.def(
+      "init",
+      [](py::object args) {
+        if (args.is_none())  // use sys.argv if no args were passed
+        {
+          py::module sys = py::module::import("sys");
+          args = sys.attr("argv");
+        }
+        return init(args.cast<std::vector<std::string>>());
+      },
+      "Initialize rclcpp", py::arg("args") = py::none());
   m.def("shutdown", &shutdown, "Shutdown rclcpp");
 
   using Class = rclcpp::NodeOptions;
