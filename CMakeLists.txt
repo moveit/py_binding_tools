@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.12)
 project(py_binding_tools)
 
 find_package(catkin REQUIRED
