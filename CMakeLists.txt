@@ -20,7 +20,7 @@ add_library(${PROJECT_NAME}
   src/ros_msg_typecasters.cpp
   src/initializer.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${PYTHON_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 target_include_directories(${PROJECT_NAME}
 	PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
   SYSTEM PUBLIC ${catkin_INCLUDE_DIRS}
