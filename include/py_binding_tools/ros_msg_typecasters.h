@@ -101,14 +101,12 @@ struct type_caster<rclcpp::Time>
   // convert from rclcpp::Time to rclpy::Time
   static handle cast(const rclcpp::Time& src, return_value_policy /* policy */, handle /* parent */)
   {
-    module rclpy_time = module::import("rclpy.time");
-    object Time = rclpy_time.attr("Time");
+    object Time = module::import("rclpy.time").attr("Time");
+    object ClockType =
+        module::import("rclpy.impl.implementation_singleton").attr("rclpy_implementation").attr("ClockType");
 
-    int64_t nanoseconds = src.nanoseconds();
-    int clock_type = static_cast<int>(src.get_clock_type());
-
-    return Time(arg("nanoseconds") = nanoseconds,
-                arg("clock_type") = clock_type)
+    return Time(arg("nanoseconds") = src.nanoseconds(),
+                arg("clock_type") = ClockType(src.get_clock_type()))
         .release();  // release the ownership of the object
   }
 

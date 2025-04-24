@@ -79,8 +79,8 @@ def test_msg_conversion_failure():
 
 
 def test_time_conversion():
-    result = incTime(rclpy.time.Time(nanoseconds=42))
-    assert result.nanoseconds == 43
+    result = incTime(rclpy.time.Time(seconds=1, nanoseconds=42))
+    assert result.nanoseconds == 1000000043
 
 
 if __name__ == "__main__":
