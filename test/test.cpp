@@ -40,6 +40,8 @@ PYBIND11_MODULE(py_binding_tools_test, m)
     return msg;
   };
   m.def("inc", increment, "increment data field of Int32 message");
+
+  m.def("incTime", [](rclcpp::Time t) { return t + rclcpp::Duration(std::chrono::nanoseconds(1)); });
 }
 
 }  // namespace

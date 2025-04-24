@@ -4,7 +4,7 @@ import time
 
 import rclpy
 import rclcpp
-from py_binding_tools_test import PubAndSub, inc
+from py_binding_tools_test import PubAndSub, inc, incTime
 
 from std_msgs.msg import Int32, Bool
 
@@ -76,6 +76,11 @@ def test_msg_conversion_failure():
         inc(Bool(data=False))
     with pytest.raises(TypeError):
         inc(42)
+
+
+def test_time_conversion():
+    result = incTime(rclpy.time.Time(nanoseconds=42))
+    assert result.nanoseconds == 43
 
 
 if __name__ == "__main__":
