@@ -82,6 +82,36 @@ struct type_caster<rclcpp::Duration>
   PYBIND11_TYPE_CASTER(rclcpp::Duration, _("Duration"));
 };
 
+/// Convert rclcpp::Time to/from rclpy::Time
+template <>
+struct type_caster<rclcpp::Time>
+{
+  // convert from rclpy::Time to rclcpp::Time
+  bool load(handle src, bool /* convert */)
+  {
+    // Extract values for constructing the rclcpp::Time object
+    int64_t nanoseconds = src.attr("nanoseconds").cast<int64_t>();
+    int clock_type = src.attr("clock_type").cast<int>();
+
+    // Construct the rclcpp::Time object
+    value = rclcpp::Time(nanoseconds, static_cast<rcl_clock_type_t>(clock_type));
+    return true;
+  }
+
+  // convert from rclcpp::Time to rclpy::Time
+  static handle cast(const rclcpp::Time& src, return_value_policy /* policy */, handle /* parent */)
+  {
+    object Time = module::import("rclpy.time").attr("Time");
+    object ClockType = Time().attr("clock_type").attr("__class__");
+
+    return Time(arg("nanoseconds") = src.nanoseconds(),
+                arg("clock_type") = ClockType(static_cast<int>(src.get_clock_type())))
+        .release();  // release the ownership of the object
+  }
+
+  PYBIND11_TYPE_CASTER(rclcpp::Time, _("Time"));
+};
+
 /// Base class for type conversion (C++ <-> python) of ROS message types
 template <typename T>
 struct RosMsgTypeCaster
