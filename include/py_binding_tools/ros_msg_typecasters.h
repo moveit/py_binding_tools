@@ -105,7 +105,7 @@ struct type_caster<rclcpp::Time>
     object ClockType = Time().attr("clock_type").attr("__class__");
 
     return Time(arg("nanoseconds") = src.nanoseconds(),
-                arg("clock_type") = ClockType(src.get_clock_type()))
+                arg("clock_type") = ClockType(static_cast<int>(src.get_clock_type())))
         .release();  // release the ownership of the object
   }
 
