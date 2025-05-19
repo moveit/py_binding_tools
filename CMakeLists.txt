@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.51)
 project(py_binding_tools)
 
 find_package(ament_cmake REQUIRED)
