@@ -2,6 +2,12 @@
 Changelog for package py_binding_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.2 (2025-05-21)
+------------------
+* Replace deprecated ament_target_dependencies()
+* Add type caster for rclpy.Time <-> rclcpp::Time (`#2 <https://github.com/ros-planning/py_binding_tools/issues/2>`_)
+* Contributors: Robert Haschke
+
 2.0.1 (2024-07-12)
 ------------------
 * rclcpp.init(None) will resort to sys.argv as with rclpy.init(None)
