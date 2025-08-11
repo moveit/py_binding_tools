@@ -44,7 +44,7 @@ namespace
 struct PubAndSub
 {
 public:
-  explicit PubAndSub()
+  PubAndSub()
   {
     ros::NodeHandle nh;
     pub = nh.advertise<std_msgs::Int32>("/test", 1);

@@ -33,6 +33,8 @@
  *********************************************************************/
 #pragma once
 
+#include <map>
+#include <string>
 #include <ros/init.h>
 
 namespace py_binding_tools

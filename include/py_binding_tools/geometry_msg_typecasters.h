@@ -36,6 +36,7 @@
 
 #pragma once
 
+#include <string>
 #include "ros_msg_typecasters.h"
 #include <geometry_msgs/PoseStamped.h>
 

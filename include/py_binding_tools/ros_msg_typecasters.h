@@ -36,6 +36,7 @@
 
 #pragma once
 
+#include <string>
 #include <pybind11/pybind11.h>
 #include <ros/duration.h>
 #include <ros/serialization.h>
