@@ -2,6 +2,13 @@
 Changelog for package py_binding_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.0 (2025-08-12)
+------------------
+* Remove unused ament_lint packages
+* Fix some cpplint issues
+* Update copyright statements
+* Contributors: Robert Haschke
+
 2.0.2 (2025-05-21)
 ------------------
 * Replace deprecated ament_target_dependencies()
