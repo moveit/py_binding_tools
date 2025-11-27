@@ -6,7 +6,6 @@ find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
-find_package(pybind11_vendor REQUIRED)
 find_package(pybind11 REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED
