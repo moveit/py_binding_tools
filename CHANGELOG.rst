@@ -2,6 +2,13 @@
 Changelog for package py_binding_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.1 (2026-04-08)
+------------------
+* Add missing transitive dependency on pybind11_catkin
+* Fix some cpplint issues
+* Update copyright statements
+* Contributors: Robert Haschke
+
 1.1.0 (2025-08-11)
 ------------------
 * Fix pybind11 deprecations
