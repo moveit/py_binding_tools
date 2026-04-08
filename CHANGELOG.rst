@@ -2,6 +2,11 @@
 Changelog for package py_binding_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.1 (2026-04-08)
+------------------
+* Removed deprecated pybind_vendor (`#9 <https://github.com/ros-planning/py_binding_tools/issues/9>`_)
+* Contributors: mosfet80
+
 2.1.0 (2025-08-12)
 ------------------
 * Remove unused ament_lint packages
