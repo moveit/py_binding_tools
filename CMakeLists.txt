@@ -13,7 +13,7 @@ COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS geometry_msgs roscpp
+  CATKIN_DEPENDS geometry_msgs pybind11_catkin roscpp
 )
 
 add_library(${PROJECT_NAME}
