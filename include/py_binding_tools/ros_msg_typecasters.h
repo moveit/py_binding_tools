@@ -102,7 +102,7 @@ struct type_caster<rclcpp::Time>
   // convert from rclcpp::Time to rclpy::Time
   static handle cast(const rclcpp::Time& src, return_value_policy /* policy */, handle /* parent */)
   {
-    object Time = module::import("rclpy.time").attr("Time");
+    object Time = module_::import("rclpy.time").attr("Time");
     object ClockType = Time().attr("clock_type").attr("__class__");
 
     return Time(arg("nanoseconds") = src.nanoseconds(),
@@ -131,7 +131,7 @@ struct RosMsgTypeCaster
     object cls = py_binding_tools::createMessageClass(rosidl_generator_traits::name<T>());
 
     // deserialize into python object
-    module rclpy = module::import("rclpy.serialization");
+    module_ rclpy = module_::import("rclpy.serialization");
     object msg = rclpy.attr("deserialize_message")(buf, cls);
 
     return msg.release();
@@ -145,7 +145,7 @@ struct RosMsgTypeCaster
       return false;
 
     // serialize src into python buffer
-    module rclpy = module::import("rclpy.serialization");
+    module_ rclpy = module_::import("rclpy.serialization");
     bytes buf = rclpy.attr("serialize_message")(src);
 
     // deserialize into C++ object
