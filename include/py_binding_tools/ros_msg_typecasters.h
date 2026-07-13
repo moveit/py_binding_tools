@@ -125,7 +125,7 @@ struct RosMsgTypeCaster
     if (!py_binding_tools::convertible(src, ros::message_traits::DataType<T>::value()))
       return false;
     // serialize src into python buffer
-    object pstream = module::import("io").attr("BytesIO")();
+    object pstream = module_::import("io").attr("BytesIO")();
     src.attr("serialize")(pstream);
     object pbuffer = pstream.attr("getvalue")();
     // deserialize C++ type from buffer

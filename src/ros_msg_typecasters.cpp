@@ -44,7 +44,7 @@ py::object createMessage(const std::string& ros_msg_name)
   // find delimiting '/' in ros msg name
   std::size_t pos = ros_msg_name.find('/');
   // import module
-  py::module m = py::module::import((ros_msg_name.substr(0, pos) + ".msg").c_str());
+  py::module m = py::module_::import((ros_msg_name.substr(0, pos) + ".msg").c_str());
   // retrieve type instance
   py::object cls = m.attr(ros_msg_name.substr(pos + 1).c_str());
   // create message instance
@@ -65,7 +65,7 @@ bool convertible(const pybind11::handle& h, const char* ros_msg_name)
 
 void throwDeserializationError()
 {
-  py::object e = py::module::import("genpy").attr("DeserializationError")();
+  py::object e = py::module_::import("genpy").attr("DeserializationError")();
   PyErr_SetObject(py::type::of(e).ptr(), e.ptr());
   throw py::error_already_set();
 }
