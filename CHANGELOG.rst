@@ -2,6 +2,11 @@
 Changelog for package py_binding_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.3 (2026-07-14)
+------------------
+* Rename module -> module\_ for C++20 compatibility (`#11 <https://github.com/ros-planning/py_binding_tools/issues/11>`_)
+* Contributors: Tobias Fischer
+
 2.1.2 (2026-04-08)
 ------------------
 * Enable type casters for ROS service+action messages too
