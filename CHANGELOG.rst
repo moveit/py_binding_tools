@@ -2,6 +2,11 @@
 Changelog for package py_binding_tools
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.4 (2026-09-01)
+------------------
+* Fix dependency on pybind11
+* Contributors: Robert Haschke
+
 2.1.3 (2026-07-14)
 ------------------
 * Rename module -> module\_ for C++20 compatibility (`#11 <https://github.com/ros-planning/py_binding_tools/issues/11>`_)
