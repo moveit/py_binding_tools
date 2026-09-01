@@ -5,8 +5,7 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
-find_package(pybind11 REQUIRED)
+include(ConfigExtras.cmake)
 
 add_library(${PROJECT_NAME} SHARED
   src/ros_msg_typecasters.cpp
@@ -52,4 +51,4 @@ endif()
 
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(geometry_msgs)
-ament_package()
+ament_package(CONFIG_EXTRAS ConfigExtras.cmake)
